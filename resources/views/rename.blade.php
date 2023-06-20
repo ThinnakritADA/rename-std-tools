@@ -9,6 +9,12 @@
             /*font-size: .75em;*/
             /*position: relative;*/
         }
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            transition: background-color 5000s ease-in-out 0s;
+        }
     </style>
 @endpush
 
@@ -25,8 +31,11 @@
             <form action="{{ route('rename') }}" method="post" id="ofmRenameForm">
                 @csrf
                 <div class="field has-addons has-addons-fullwidth">
-                    <div class="control">
+                    <div class="control has-icons-left">
                         <input class="input" type="text" name="path" placeholder="Path to project" required>
+                        <span class="icon is-small is-left">
+                          <i class="fas fa-folder"></i>
+                        </span>
                     </div>
                     <button class="button is-danger">
                         Process
@@ -132,6 +141,15 @@
             this.querySelector('button').classList.remove('is-loading');
             document.querySelector('#odvNyanCat').classList.add('is-hidden');
             await audio.pause();
+        });
+        document.querySelector('input[name="path"]').addEventListener('change', function (e) {
+            if(this.value !== '') {
+                document.querySelector('i.fas').classList.remove('fa-folder');
+                document.querySelector('i.fas').classList.add('fa-folder-open');
+            }else {
+                document.querySelector('i.fas').classList.remove('fa-folder-open');
+                document.querySelector('i.fas').classList.add('fa-folder');
+            }
         });
     </script>
 @endpush
