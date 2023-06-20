@@ -71,7 +71,7 @@
             audio.pause();
         });
         audio.loop = true;
-        audio.volume = 0.5;
+        audio.volume = 0.2;
         async function FSxRENChangeListTable(ptActionUrl, ptPath) {
             const oTableController = document.querySelector('#odvChangeListTable1');
             const oTableModel = document.querySelector('#odvChangeListTable2');
