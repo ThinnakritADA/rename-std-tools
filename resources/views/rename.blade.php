@@ -15,11 +15,17 @@
 <section class="hero is-primary is-medium">
     <div class="hero-body">
         <div class="container">
+            <h1 class="title">
+                กรุณากรอก Path ที่ต้องการเปลี่ยนชื่อ
+            </h1>
+            <h4 class="subtitle">
+                ตัวอย่างเช่น <code>C:/xampp/htdocs/AdaStoreBack</code>
+            </h4>
             <form action="{{ route('rename') }}" method="post" id="renameForm">
                 @csrf
                 <div class="field has-addons has-addons-fullwidth">
                     <div class="control">
-                        <input class="input" type="text" name="path" placeholder="Path to controller" required>
+                        <input class="input" type="text" name="path" placeholder="Path to project" required>
                     </div>
                     <button class="button is-danger">
                         Process
