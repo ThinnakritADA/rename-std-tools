@@ -41,7 +41,7 @@ class RenameController extends Controller
     {
         try {
             $finder = new Finder();
-            $finder->files()->in($path)->name('/^c[A-Z]\w+\.php$/');
+            $finder->files()->in($path)->name('/^c[A-Z]\w+\.php$/')->notName('/(_controller|_model)\.php$/');
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() ?? 500);
         }
@@ -54,7 +54,7 @@ class RenameController extends Controller
 
         try {
             $finder = new Finder();
-            $finder->files()->in($path)->name('/^m[A-Z]\w+\.php$/');
+            $finder->files()->in($path)->name('/^m[A-Z]\w+\.php$/')->notName('/(_controller|_model)\.php$/');
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() ?? 500);
         }
