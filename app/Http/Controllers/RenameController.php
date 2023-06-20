@@ -30,6 +30,8 @@ class RenameController extends Controller
         // rename in route
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'route';
         $this->replaceRouteName($path, $controllerLists);
+        $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'helpers';
+        $this->replaceHelper($path, $moduleLists);
         return response()->json(['success' =>
             [
             'controller' => $controllerLists,
@@ -124,6 +126,28 @@ class RenameController extends Controller
         $finder->files()->in($path)->name('*.php');
 
         foreach ($finder as $file) {
+            // Get the file contents
+            $fileContents = file_get_contents($file->getRealPath());
+
+            // Replace all occurrences
+            $array->each(function ($item, $key) use (&$fileContents) {
+                $fileContents = str_replace($item['originalName'], $item['newName'], $fileContents);
+            });
+
+            file_put_contents($file->getRealPath(), $fileContents);
+        }
+    }
+
+    public function replaceHelper(string $path,Collection $array)
+    {
+        $finder = new Finder();
+        $finder->files()->in($path)->name('*.php')->notName('/^[wj].*/');
+
+        foreach ($finder as $file) {
+            $originalName = $file->getBasename('.php');
+            $newName = strtolower($originalName);
+            // rename the file
+            rename($file->getRealPath(), $file->getPath() . DIRECTORY_SEPARATOR . $newName . '.php');
             // Get the file contents
             $fileContents = file_get_contents($file->getRealPath());
 
