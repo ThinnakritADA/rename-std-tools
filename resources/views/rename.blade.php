@@ -66,6 +66,10 @@
 @push('js')
     <script>
         let audio = document.getElementsByTagName("audio")[0];
+        document.getElementsByTagName('body')[0].addEventListener('click', function () {
+            audio.play();
+            audio.pause();
+        });
         audio.loop = true;
         audio.volume = 0.5;
         async function FSxRENChangeListTable(ptActionUrl, ptPath) {
