@@ -21,7 +21,7 @@
             <h4 class="subtitle">
                 ตัวอย่างเช่น <code>C:/xampp/htdocs/AdaStoreBack</code>
             </h4>
-            <form action="{{ route('rename') }}" method="post" id="renameForm">
+            <form action="{{ route('rename') }}" method="post" id="ofmRenameForm">
                 @csrf
                 <div class="field has-addons has-addons-fullwidth">
                     <div class="control">
@@ -35,7 +35,7 @@
         </div>
     </div>
 </section>
-<section class="hero is-highlight is-medium is-hidden" id="resultChangeList">
+<section class="hero is-highlight is-medium is-hidden" id="ostResultChangeList">
     <div class="hero-body pt-6">
         <div class="container">
             <div class="columns is-centered">
@@ -51,60 +51,60 @@
 
 @push('js')
     <script>
-        async function FSxRENChangeListTable(actionUrl, path) {
-            const tableController = document.querySelector('#odvChangeListTable1');
-            const tableModel = document.querySelector('#odvChangeListTable2');
-            tableController.innerHTML = '';
-            tableModel.innerHTML = '';
-            const response = await fetch(actionUrl,{
+        async function FSxRENChangeListTable(ptActionUrl, ptPath) {
+            const oTableController = document.querySelector('#odvChangeListTable1');
+            const oTableModel = document.querySelector('#odvChangeListTable2');
+            oTableController.innerHTML = '';
+            oTableModel.innerHTML = '';
+            const oResponse = await fetch(ptActionUrl,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 },
                 body: JSON.stringify({
-                    path
+                    path: ptPath
                 })
             });
-            const data = await response.json();
-            if(data.error) {
-                console.error(data);
-                alert('Something went wrong ! \nReason: ' + data.error);
+            const oData = await oResponse.json();
+            if(oData.error) {
+                console.error(oData);
+                alert('เกิดข้อผิดพลาด ! \nReason: ' + oData.error);
                 return;
             }
-            if(data.success) {
-                document.querySelector('#resultChangeList').classList.remove('is-hidden');
-                tableController.innerHTML = '<h1 class="title has-text-white">Controller</h1>';
-                tableController.innerHTML += '<table class="table is-bordered is-dark is-fullwidth">\n' +
+            if(oData.success) {
+                document.querySelector('#ostResultChangeList').classList.remove('is-hidden');
+                oTableController.innerHTML = '<h1 class="title has-text-white">Controller</h1>';
+                oTableController.innerHTML += '<table class="table is-bordered is-striped is-fullwidth">\n' +
                     '                        <thead>\n' +
                     '                        <tr>\n' +
-                    '                            <th>Old Name</th>\n' +
-                    '                            <th>New Name</th>\n' +
+                    '                            <th class="has-text-centered">Old Name</th>\n' +
+                    '                            <th class="has-text-centered">New Name</th>\n' +
                     '                        </tr>\n' +
                     '                        </thead>\n' +
                     '                        <tbody>\n' +
                     '                        </tbody>\n' +
                     '                    </table>';
-                data.success.controller.forEach((item) => {
-                    tableController.querySelector('tbody').innerHTML += '<tr>\n' +
+                oData.success.controller.forEach((item) => {
+                    oTableController.querySelector('tbody').innerHTML += '<tr>\n' +
                         '                            <td>' + item.originalName + '</td>\n' +
                         '                            <td>' + item.newName + '</td>\n' +
                         '                        </tr>';
                 });
 
-                tableModel.innerHTML = '<h1 class="title has-text-white">Model</h1>';
-                tableModel.innerHTML += '<table class="table is-bordered is-dark is-fullwidth">\n' +
+                oTableModel.innerHTML = '<h1 class="title has-text-white">Model</h1>';
+                oTableModel.innerHTML += '<table class="table is-bordered is-striped is-fullwidth">\n' +
                     '                        <thead>\n' +
                     '                        <tr>\n' +
-                    '                            <th>Old Name</th>\n' +
-                    '                            <th>New Name</th>\n' +
+                    '                            <th class="has-text-centered">Old Name</th>\n' +
+                    '                            <th class="has-text-centered">New Name</th>\n' +
                     '                        </tr>\n' +
                     '                        </thead>\n' +
                     '                        <tbody>\n' +
                     '                        </tbody>\n' +
                     '                    </table>';
-                data.success.model.forEach((item) => {
-                    tableModel.querySelector('tbody').innerHTML += '<tr>\n' +
+                oData.success.model.forEach((item) => {
+                    oTableModel.querySelector('tbody').innerHTML += '<tr>\n' +
                         '                            <td>' + item.originalName + '</td>\n' +
                         '                            <td>' + item.newName + '</td>\n' +
                         '                        </tr>';
@@ -112,12 +112,12 @@
             }
         }
 
-        document.querySelector('#renameForm').addEventListener('submit', async function (e) {
+        document.querySelector('#ofmRenameForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             this.querySelector('button').classList.add('is-loading');
-            const path = document.querySelector('input[name="path"]').value;
-            const actionUrl = e.target.action;
-            await FSxRENChangeListTable(actionUrl, path);
+            const tPath = document.querySelector('input[name="path"]').value;
+            const tActionUrl = e.target.action;
+            await FSxRENChangeListTable(tActionUrl, tPath);
             this.querySelector('button').classList.remove('is-loading');
         });
     </script>
