@@ -1,6 +1,7 @@
 @extends('template.master')
 
 @push('css')
+    <link rel="stylesheet" href="{{ asset('css/nyancat.css') }}"/>
     <style>
         .is-highlight {
             background-color: #1f2330;
@@ -32,6 +33,10 @@
                     </button>
                 </div>
             </form>
+            <div id="odvNyanCat" class="NyanCat NyanSize is-hidden"></div>
+            <audio preload muted>
+                <source src="{{ URL::asset('media/nyancat.ogg') }}" type="audio/ogg">
+            </audio>
         </div>
     </div>
 </section>
@@ -51,6 +56,9 @@
 
 @push('js')
     <script>
+        let audio = document.getElementsByTagName("audio")[0];
+        audio.loop = true;
+        audio.volume = 0.5;
         async function FSxRENChangeListTable(ptActionUrl, ptPath) {
             const oTableController = document.querySelector('#odvChangeListTable1');
             const oTableModel = document.querySelector('#odvChangeListTable2');
@@ -114,11 +122,16 @@
 
         document.querySelector('#ofmRenameForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            audio.muted = false;
+            await audio.play();
+            document.querySelector('#odvNyanCat').classList.remove('is-hidden');
             this.querySelector('button').classList.add('is-loading');
             const tPath = document.querySelector('input[name="path"]').value;
             const tActionUrl = e.target.action;
             await FSxRENChangeListTable(tActionUrl, tPath);
             this.querySelector('button').classList.remove('is-loading');
+            document.querySelector('#odvNyanCat').classList.add('is-hidden');
+            await audio.pause();
         });
     </script>
 @endpush
