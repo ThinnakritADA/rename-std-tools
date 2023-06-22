@@ -34,8 +34,14 @@ class RenameController extends Controller
         // rename in route
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'route';
         $this->replaceRouteName($path, $controllerLists->sortByDesc('originalName'));
+        $this->replaceRouteName($path, $allLists->sortByDesc('originalName')->filter(function ($value, $key) {
+            return $value['fileType'] == 'controller';
+        })->values());
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'helpers';
         $this->replaceHelper($path, $moduleLists->sortByDesc('originalName'));
+        $this->replaceHelper($path, $allLists->sortByDesc('originalName')->filter(function ($value, $key) {
+            return $value['fileType'] == 'model';
+        })->values());
         return response()->json(['success' =>
             [
                 'controller' => $controllerLists,
