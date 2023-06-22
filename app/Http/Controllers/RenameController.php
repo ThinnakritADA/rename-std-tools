@@ -20,11 +20,14 @@ class RenameController extends Controller
         set_time_limit(0);
         $basePath = $request->input('path');
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'modules';
+        $langPath = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'language';
         if (empty($path) || !is_dir($path)) {
             return response()->json(['error' => 'Invalid path'], 400);
         }
         $allDirectories = new Collection($this->fixDirectoryName($path));
         $this->replaceDirName($path, $allDirectories);
+        $allDirectoriesLang = new Collection($this->fixDirectoryName($langPath));
+        $this->replaceDirName($path, $allDirectoriesLang);
         // rename in modules
         $controllerLists = $this->renameController($path);
         $moduleLists = $this->renameModel($path);
@@ -46,7 +49,7 @@ class RenameController extends Controller
             [
                 'controller' => $controllerLists,
                 'model' => $moduleLists,
-                'directory' => $allDirectories,
+                'directory' => array_merge($allDirectories->toArray(),$allDirectoriesLang->toArray()),
             ]
         ]);
     }
