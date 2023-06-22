@@ -29,8 +29,8 @@ class RenameController extends Controller
         $controllerLists = $this->renameController($path);
         $moduleLists = $this->renameModel($path);
         $allLists = $this->getAllAndFixName($path)->sortByDesc('originalName');
-        $this->replaceName($path, $moduleLists->sortByDesc('originalName'));
-        $this->replaceName($path, $controllerLists->sortByDesc('originalName'));
+        $this->replaceNameModel($path, $moduleLists->sortByDesc('originalName'));
+        $this->replaceNameController($path, $controllerLists->sortByDesc('originalName'));
         // rename in route
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'route';
         $this->replaceRouteName($path, $controllerLists->sortByDesc('originalName'));
@@ -113,7 +113,7 @@ class RenameController extends Controller
         return $fileList;
     }
 
-    public function replaceName(string $path ,Collection $array) : void
+    public function replaceNameModel(string $path ,Collection $array) : void
     {
         $finder = new Finder();
         $finder->files()->in($path)->name('*.php')->notName('/^[wj].*/');
@@ -125,6 +125,24 @@ class RenameController extends Controller
             // Replace all occurrences
             $array->each(function ($item, $key) use (&$fileContents) {
                 $fileContents = str_replace($item['originalName'], $item['newName'], $fileContents);
+            });
+
+            file_put_contents($file->getRealPath(), $fileContents);
+        }
+    }
+
+    public function replaceNameController(string $path ,Collection $array) : void
+    {
+        $finder = new Finder();
+        $finder->files()->in($path)->name('*.php')->notName('/^[wj].*/');
+
+        foreach ($finder as $file) {
+            // Get the file contents
+            $fileContents = file_get_contents($file->getRealPath());
+
+            // Replace all occurrences
+            $array->each(function ($item, $key) use (&$fileContents) {
+                $fileContents = str_replace($item['originalName'] . "/", $item['newName'] . "/", $fileContents);
             });
 
             file_put_contents($file->getRealPath(), $fileContents);
