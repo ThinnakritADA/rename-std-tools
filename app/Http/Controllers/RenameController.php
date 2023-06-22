@@ -196,7 +196,7 @@ class RenameController extends Controller
         $fileList = new Collection();
         foreach ($finder as $file) {
             $originalName = $file->getBasename('.php');
-            $newName = strtolower($originalName);
+            $newName = ucfirst(strtolower($originalName));
             // rename the file
             rename($file->getRealPath(), $file->getPath() . DIRECTORY_SEPARATOR . $newName . '.php');
 
