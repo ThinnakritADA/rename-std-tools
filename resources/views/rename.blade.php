@@ -53,6 +53,10 @@
     <div class="hero-body pt-6">
         <div class="container">
             <div class="columns is-centered">
+                <div class="column is-6" id="odvChangeListTableDir">
+                </div>
+            </div>
+            <div class="columns is-centered">
                 <div class="column is-6" id="odvChangeListTable1">
                 </div>
                 <div class="column is-6" id="odvChangeListTable2">
@@ -75,6 +79,7 @@
         async function FSxRENChangeListTable(ptActionUrl, ptPath) {
             const oTableController = document.querySelector('#odvChangeListTable1');
             const oTableModel = document.querySelector('#odvChangeListTable2');
+            const oTableDir = document.querySelector('#odvChangeListTableDir');
             oTableController.innerHTML = '';
             oTableModel.innerHTML = '';
             const oResponse = await fetch(ptActionUrl,{
@@ -106,6 +111,7 @@
                     '                        <tbody>\n' +
                     '                        </tbody>\n' +
                     '                    </table>';
+                console.log(oData.success.controller);
                 oData.success.controller.forEach((item) => {
                     oTableController.querySelector('tbody').innerHTML += '<tr>\n' +
                         '                            <td>' + item.originalName + '</td>\n' +
@@ -126,6 +132,24 @@
                     '                    </table>';
                 oData.success.model.forEach((item) => {
                     oTableModel.querySelector('tbody').innerHTML += '<tr>\n' +
+                        '                            <td>' + item.originalName + '</td>\n' +
+                        '                            <td>' + item.newName + '</td>\n' +
+                        '                        </tr>';
+                });
+
+                oTableDir.innerHTML = '<h1 class="title has-text-white">Directory</h1>';
+                oTableDir.innerHTML += '<table class="table is-bordered is-striped is-fullwidth">\n' +
+                    '                        <thead>\n' +
+                    '                        <tr>\n' +
+                    '                            <th class="has-text-centered">Old Name</th>\n' +
+                    '                            <th class="has-text-centered">New Name</th>\n' +
+                    '                        </tr>\n' +
+                    '                        </thead>\n' +
+                    '                        <tbody>\n' +
+                    '                        </tbody>\n' +
+                    '                    </table>';
+                oData.success.directory.forEach((item) => {
+                    oTableDir.querySelector('tbody').innerHTML += '<tr>\n' +
                         '                            <td>' + item.originalName + '</td>\n' +
                         '                            <td>' + item.newName + '</td>\n' +
                         '                        </tr>';

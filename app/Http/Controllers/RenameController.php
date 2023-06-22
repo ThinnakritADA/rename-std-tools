@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
 
 class RenameController extends Controller
@@ -20,22 +21,26 @@ class RenameController extends Controller
         $basePath = $request->input('path');
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'modules';
         if (empty($path) || !is_dir($path)) {
-            return response()->json(['error' => 'ที่อยู่ไม่ถูกต้อง'], 400);
+            return response()->json(['error' => 'Invalid path'], 400);
         }
+        $allDirectories = new Collection($this->fixDirectoryName($path));
+        $this->replaceDirName($path, $allDirectories);
         // rename in modules
         $controllerLists = $this->renameController($path);
         $moduleLists = $this->renameModel($path);
-        $this->replaceName($path, $moduleLists);
-        $this->replaceName($path, $controllerLists);
+        $allLists = $this->getAllAndFixName($path)->sortByDesc('originalName');
+        $this->replaceName($path, $moduleLists->sortByDesc('originalName'));
+        $this->replaceName($path, $controllerLists->sortByDesc('originalName'));
         // rename in route
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'route';
-        $this->replaceRouteName($path, $controllerLists);
+        $this->replaceRouteName($path, $controllerLists->sortByDesc('originalName'));
         $path = $basePath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'helpers';
-        $this->replaceHelper($path, $moduleLists);
+        $this->replaceHelper($path, $moduleLists->sortByDesc('originalName'));
         return response()->json(['success' =>
             [
-            'controller' => $controllerLists,
-            'model' => $moduleLists,
+                'controller' => $controllerLists,
+                'model' => $moduleLists,
+                'directory' => $allDirectories,
             ]
         ]);
     }
@@ -102,7 +107,7 @@ class RenameController extends Controller
         return $fileList;
     }
 
-    public function replaceName(string $path ,Collection $array)
+    public function replaceName(string $path ,Collection $array) : void
     {
         $finder = new Finder();
         $finder->files()->in($path)->name('*.php')->notName('/^[wj].*/');
@@ -120,7 +125,25 @@ class RenameController extends Controller
         }
     }
 
-    public function replaceRouteName(string $path ,Collection $array)
+    public function replaceDirName(string $path ,Collection $array) : void
+    {
+        $finder = new Finder();
+        $finder->files()->in($path)->name('*.php');
+
+        foreach ($finder as $file) {
+            // Get the file contents
+            $fileContents = file_get_contents($file->getRealPath());
+
+            // Replace
+            $array->each(function ($item, $key) use (&$fileContents) {
+                $fileContents = str_replace($item['originalName']."/", $item['newName']."/", $fileContents);
+            });
+
+            file_put_contents($file->getRealPath(), $fileContents);
+        }
+    }
+
+    public function replaceRouteName(string $path ,Collection $array) : void
     {
         $finder = new Finder();
         $finder->files()->in($path)->name('*.php');
@@ -138,7 +161,7 @@ class RenameController extends Controller
         }
     }
 
-    public function replaceHelper(string $path,Collection $array)
+    public function replaceHelper(string $path,Collection $array) : void
     {
         $finder = new Finder();
         $finder->files()->in($path)->name('*.php')->notName('/^[wj].*/');
@@ -160,4 +183,54 @@ class RenameController extends Controller
         }
     }
 
+    public function getAllAndFixName(string $path) : Collection
+    {
+        $finder = new Finder();
+        $finder->files()->in($path)->name('/(_controller|_model)\.php$/');
+        $fileList = new Collection();
+        foreach ($finder as $file) {
+            $originalName = $file->getBasename('.php');
+            $newName = strtolower($originalName);
+            // rename the file
+            rename($file->getRealPath(), $file->getPath() . DIRECTORY_SEPARATOR . $newName . '.php');
+
+            // change class name in the file
+            $content = file_get_contents($file->getPath() . DIRECTORY_SEPARATOR . $newName . '.php');
+            $content = str_replace("class {$originalName}", "class {$newName}", $content);
+            file_put_contents($file->getPath() . DIRECTORY_SEPARATOR . $newName . '.php', $content);
+            $fileType =strpos($newName, '_controller') ? 'controller' : 'model';
+            $fileList->push(
+                [
+                    'originalName' => $originalName,
+                    'newName' => $newName,
+                    'fileType' => $fileType,
+                ]
+            );
+        }
+        return $fileList;
+    }
+
+    public function fixDirectoryName(string $directory , $subdirectories = [] , &$nameChange = []) : array
+    {
+        $directories = File::directories($directory);
+
+        foreach ($directories as $directory) {
+            $subdirectories[] = $directory;
+            if($this->hasUppercase(basename($directory))){
+                $newName = strtolower(basename($directory));
+                $nameChange[] = [
+                    'originalName' => basename($directory),
+                    'newName' => $newName,
+                ];
+                rename($directory, dirname($directory) . DIRECTORY_SEPARATOR . $newName);
+            }
+            $this->fixDirectoryName($directory, $subdirectories, $nameChange);
+        }
+        return $nameChange;
+    }
+
+    function hasUppercase(string $string) : bool
+    {
+        return preg_match('/[A-Z]/', $string) > 0;
+    }
 }
